@@ -2194,6 +2194,86 @@ describe("SessionNs.getUsage", () => {
     expect(result.cost).toBeCloseTo((800 * 0.6 + 20 * 4 + 100 * 1 + 200 * 0.15) / 1_000_000, 10)
   })
 
+  test("uses openrouter direct cost when metadata.openrouter.usage.cost is present", () => {
+    const model = createModel({
+      context: 100_000,
+      output: 32_000,
+      cost: { input: 999, output: 999, cache: { read: 999, write: 0 } },
+    })
+    const result = SessionNs.getUsage({
+      model,
+      usage: {
+        inputTokens: 1000,
+        outputTokens: 200,
+        totalTokens: 1200,
+        inputTokenDetails: {
+          noCacheTokens: 800,
+          cacheReadTokens: 200,
+          cacheWriteTokens: undefined,
+        },
+        outputTokenDetails: {
+          textTokens: 180,
+          reasoningTokens: 20,
+        },
+      },
+      metadata: {
+        openrouter: {
+          usage: { cost: 0.00123 },
+        },
+      } as any,
+    })
+
+    expect(result.cost).toBe(0.00123)
+    expect(result.tokens.input).toBe(800)
+    expect(result.tokens.cache.read).toBe(200)
+    expect(result.tokens.reasoning).toBe(20)
+  })
+
+  test("treats openrouter cost of 0 as free (does not fall through to local calc)", () => {
+    const model = createModel({
+      context: 100_000,
+      output: 32_000,
+      cost: { input: 999, output: 999, cache: { read: 999, write: 0 } },
+    })
+    const result = SessionNs.getUsage({
+      model,
+      usage: {
+        inputTokens: 100,
+        outputTokens: 50,
+        totalTokens: 150,
+        inputTokenDetails: { noCacheTokens: undefined, cacheReadTokens: undefined, cacheWriteTokens: undefined },
+        outputTokenDetails: { textTokens: 50, reasoningTokens: undefined },
+      },
+      metadata: {
+        openrouter: {
+          usage: { cost: 0 },
+        },
+      } as any,
+    })
+
+    expect(result.cost).toBe(0)
+  })
+
+  test("falls back to local cost calc when openrouter metadata is absent", () => {
+    const model = createModel({
+      context: 100_000,
+      output: 32_000,
+      cost: { input: 1, output: 2, cache: { read: 0, write: 0 } },
+    })
+    const result = SessionNs.getUsage({
+      model,
+      usage: {
+        inputTokens: 1000,
+        outputTokens: 500,
+        totalTokens: 1500,
+        inputTokenDetails: { noCacheTokens: undefined, cacheReadTokens: undefined, cacheWriteTokens: undefined },
+        outputTokenDetails: { textTokens: 500, reasoningTokens: undefined },
+      },
+    })
+
+    expect(result.cost).toBeCloseTo((1000 * 1 + 500 * 2) / 1_000_000, 10)
+  })
+
   test.each(["@ai-sdk/anthropic", "@ai-sdk/amazon-bedrock", "@ai-sdk/google-vertex/anthropic"])(
     "computes total from components for %s models",
     (npm) => {

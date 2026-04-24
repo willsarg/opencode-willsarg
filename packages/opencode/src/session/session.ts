@@ -401,6 +401,11 @@ export const getUsage = (input: { model: Provider.Model; usage: LanguageModelUsa
     },
   }
 
+  // OpenRouter reports the actual charged cost directly; trust it over local token-price math
+  // because the underlying model routed to may differ from what models.dev has priced.
+  const openrouterCost = (input.metadata?.["openrouter"] as any)?.["usage"]?.["cost"]
+  if (openrouterCost !== undefined) return { cost: safe(openrouterCost), tokens }
+
   const costInfo =
     input.model.cost?.experimentalOver200K && tokens.input + tokens.cache.read > 200_000
       ? input.model.cost.experimentalOver200K

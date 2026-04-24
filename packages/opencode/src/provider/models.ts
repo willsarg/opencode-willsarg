@@ -12,12 +12,14 @@ import { withTransientReadRetry } from "@/util/effect-http-client"
 const Cost = Schema.Struct({
   input: Schema.Finite,
   output: Schema.Finite,
+  reasoning: Schema.optional(Schema.Finite),
   cache_read: Schema.optional(Schema.Finite),
   cache_write: Schema.optional(Schema.Finite),
   context_over_200k: Schema.optional(
     Schema.Struct({
       input: Schema.Finite,
       output: Schema.Finite,
+      reasoning: Schema.optional(Schema.Finite),
       cache_read: Schema.optional(Schema.Finite),
       cache_write: Schema.optional(Schema.Finite),
     }),

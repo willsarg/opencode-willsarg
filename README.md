@@ -120,6 +120,15 @@ For more info on how to configure OpenCode, [**head over to our docs**](https://
 
 If you're interested in contributing to OpenCode, please read our [contributing docs](./CONTRIBUTING.md) before submitting a pull request.
 
+### Fork Notes
+
+This fork keeps a small set of local workflow docs so fresh agent sessions can operate consistently.
+
+- Repo instructions: [`AGENTS.md`](./AGENTS.md)
+- Bootstrap: [`docs/dev-bootstrap.md`](./docs/dev-bootstrap.md)
+- Fork workflow: [`docs/willsarg-fork-workflow.md`](./docs/willsarg-fork-workflow.md)
+- Divergence tracker: [`docs/fork-roadmap.md`](./docs/fork-roadmap.md)
+
 ### Building on OpenCode
 
 If you are working on a project that's related to OpenCode and is using "opencode" as part of its name, for example "opencode-dashboard" or "opencode-mobile", please add a note to your README to clarify that it is not built by the OpenCode team and is not affiliated with us in any way.

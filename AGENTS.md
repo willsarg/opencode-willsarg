@@ -1,8 +1,36 @@
+- This repository is Will's fork of `sst/opencode`.
+- Primary goal: fix provider/accounting issues and make targeted product improvements without making upstream sync painful.
 - To regenerate the JavaScript SDK, run `./packages/sdk/js/script/build.ts`.
 - ALWAYS USE PARALLEL TOOLS WHEN APPLICABLE.
 - The default branch in this repo is `dev`.
 - Local `main` ref may not exist; use `dev` or `origin/dev` for diffs.
 - Prefer automation: execute requested actions without confirmation unless blocked by missing info or safety/irreversibility.
+
+## Fork Workflow
+
+- `main` is the upstream-sync branch and should remain a clean mirror of `sst/opencode`.
+- `dev` is Will's integration branch and the default branch for active fork work.
+- `feat/*` branches are temporary scoped task branches from `dev`.
+- Never do feature work directly on `main`.
+- Merge finished `feat/*` work into `dev` immediately after verification, then delete the feature branch locally and on origin.
+- If a task is tiny, docs-only, or strictly local, a narrowly scoped commit on `dev` is acceptable.
+
+## First Steps For Each Non-Trivial Task
+
+1. Run `git status -sb`.
+2. Run `git branch --show-current`.
+3. Read this file and `docs/willsarg-fork-workflow.md`.
+4. If toolchain setup may be needed, read `docs/dev-bootstrap.md`.
+5. For substantial work, create a new `feat/*` branch from `dev`.
+
+## Fork Maintainability Rules
+
+- Keep commits and branches tightly scoped.
+- Keep Will-specific changes separate from upstreamable fixes when practical.
+- Avoid large mixed-purpose refactors unless they are clearly worth the future merge cost.
+- Before changing structure, ask: "Can this be implemented as a small patch on top of upstream?"
+- If yes, do that.
+- If no, document the reason in the commit message, PR notes, or task notes.
 
 ## Style Guide
 

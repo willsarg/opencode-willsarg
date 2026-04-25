@@ -355,12 +355,22 @@ export const getUsage = (input: { model: Provider.Model; usage: LanguageModelUsa
     if (!Number.isFinite(value)) return 0
     return value
   }
-  const inputTokens = safe(input.usage.inputTokens ?? 0)
-  const outputTokens = safe(input.usage.outputTokens ?? 0)
-  const reasoningTokens = safe(input.usage.outputTokenDetails?.reasoningTokens ?? input.usage.reasoningTokens ?? 0)
+  const orUsage = (input.metadata?.["openrouter"] as any)?.["usage"]
+
+  const inputTokens = safe(input.usage.inputTokens || orUsage?.promptTokens || 0)
+  const outputTokens = safe(input.usage.outputTokens || orUsage?.completionTokens || 0)
+  const reasoningTokens = safe(
+    input.usage.outputTokenDetails?.reasoningTokens ??
+      input.usage.reasoningTokens ??
+      orUsage?.completionTokensDetails?.reasoningTokens ??
+      0,
+  )
 
   const cacheReadInputTokens = safe(
-    input.usage.inputTokenDetails?.cacheReadTokens ?? input.usage.cachedInputTokens ?? 0,
+    input.usage.inputTokenDetails?.cacheReadTokens ??
+      input.usage.cachedInputTokens ??
+      orUsage?.promptTokensDetails?.cachedTokens ??
+      0,
   )
   const cacheWriteInputTokens = safe(
     Number(

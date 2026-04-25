@@ -2274,6 +2274,42 @@ describe("SessionNs.getUsage", () => {
     expect(result.cost).toBeCloseTo((1000 * 1 + 500 * 2) / 1_000_000, 10)
   })
 
+  test("falls back to openrouter metadata tokens when normalized usage fields are zero", () => {
+    const model = createModel({
+      context: 100_000,
+      output: 32_000,
+      cost: { input: 999, output: 999, cache: { read: 999, write: 0 } },
+    })
+    const result = SessionNs.getUsage({
+      model,
+      usage: {
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        inputTokenDetails: { noCacheTokens: undefined, cacheReadTokens: undefined, cacheWriteTokens: undefined },
+        outputTokenDetails: { textTokens: undefined, reasoningTokens: undefined },
+      },
+      metadata: {
+        openrouter: {
+          usage: {
+            cost: 0.00456,
+            promptTokens: 1200,
+            completionTokens: 300,
+            totalTokens: 1500,
+            promptTokensDetails: { cachedTokens: 200 },
+            completionTokensDetails: { reasoningTokens: 50 },
+          },
+        },
+      } as any,
+    })
+
+    expect(result.cost).toBe(0.00456)
+    expect(result.tokens.input).toBe(1000) // 1200 - 200 cached
+    expect(result.tokens.cache.read).toBe(200)
+    expect(result.tokens.output).toBe(250) // 300 - 50 reasoning
+    expect(result.tokens.reasoning).toBe(50)
+  })
+
   test.each(["@ai-sdk/anthropic", "@ai-sdk/amazon-bedrock", "@ai-sdk/google-vertex/anthropic"])(
     "computes total from components for %s models",
     (npm) => {

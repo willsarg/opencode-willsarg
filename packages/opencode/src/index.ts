@@ -39,8 +39,14 @@ import { PluginCommand } from "./cli/cmd/plug"
 import { Heap } from "./cli/heap"
 import { drizzle } from "drizzle-orm/bun-sqlite"
 import { ensureProcessMetadata } from "@opencode-ai/core/util/opencode-process"
+import { existsSync } from "fs"
 
 const processMetadata = ensureProcessMetadata("main")
+
+const launchDirectory = process.env.PWD
+if (launchDirectory && launchDirectory !== process.cwd() && existsSync(launchDirectory)) {
+  process.chdir(launchDirectory)
+}
 
 process.on("unhandledRejection", (e) => {
   Log.Default.error("rejection", {

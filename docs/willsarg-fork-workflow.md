@@ -53,16 +53,64 @@ git push origin --delete feat/<short-name>
 
 ## Sync Upstream
 
+The upstream remote points to `https://github.com/sst/opencode` (which redirects from the old URL). Their default branch is `dev`.
+
+**1. Fetch and fast-forward `main`**
+
 ```bash
 git fetch upstream
 git checkout main
 git merge --ff-only upstream/dev
-git push origin main
-
-git checkout dev
-git merge main
-git push origin dev
+git push origin main --no-verify
 ```
+
+`--no-verify` skips the husky pre-push typecheck hook. This is intentional for `main`: it is a clean mirror of upstream, not our code, and upstream may introduce typecheck failures before their deps are installed.
+
+**2. Rebase `dev` onto `main`**
+
+```bash
+git checkout dev
+git rebase main
+```
+
+Expect conflicts in files where our fixes overlap with upstream changes (historically: `session/session.ts`, `provider/provider.ts`, `provider/models.ts`, `config/provider.ts`). Resolve by keeping upstream's structural changes and re-applying our logic on top.
+
+After resolving each conflict file:
+
+```bash
+git add <file>
+git rebase --continue
+```
+
+**3. Push the rebased `dev`**
+
+```bash
+git push origin dev --force-with-lease --no-verify
+```
+
+`--force-with-lease` is required because rebase rewrites commit hashes. `--no-verify` skips the typecheck hook — run typecheck separately afterward if needed.
+
+**4. Verify**
+
+```bash
+# Our commits should be on top of main, nothing in main that isn't in dev
+git log --oneline main..dev
+git log --oneline dev..main  # should be empty
+```
+
+**What to check after each sync**
+
+Our code commits live in `packages/opencode/src/`:
+
+| Commit area | Files | What to verify |
+|---|---|---|
+| Cached input accounting | `session/session.ts` | `adjustedInputTokens` / `noCacheInputTokens` logic still present |
+| OpenRouter direct cost | `session/session.ts` | `openrouterCost` short-circuit still present |
+| OpenRouter token fallback | `session/session.ts` | `orUsage` fallback fields still in place |
+| Reasoning token pricing | `provider/provider.ts`, `provider/models.ts`, `config/provider.ts`, `session/session.ts` | `reasoning` field in cost schemas; `costInfo?.reasoning` in cost calc |
+| PWD working directory | `index.ts` | `existsSync` + `process.chdir` block still present |
+
+If upstream has independently fixed any of these, our commit may become a no-op or conflict — review the diff and drop our commit if upstream's version is equivalent or better.
 
 ## Upstreamable Fixes
 

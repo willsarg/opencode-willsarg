@@ -1,4 +1,4 @@
-- This repository is Will's fork of `sst/opencode`.
+- This repository is Will's fork of `anomalyco/opencode`.
 - Primary goal: fix provider/accounting issues and make targeted product improvements without making upstream sync painful.
 - To regenerate the JavaScript SDK, run `./packages/sdk/js/script/build.ts`.
 - ALWAYS USE PARALLEL TOOLS WHEN APPLICABLE.
@@ -8,7 +8,7 @@
 
 ## Fork Workflow
 
-- `main` is the upstream-sync branch and should remain a clean mirror of `sst/opencode`.
+- `main` is the upstream-sync branch and should remain a clean mirror of `anomalyco/opencode`.
 - `dev` is Will's integration branch and the default branch for active fork work.
 - `feat/*` branches are temporary scoped task branches from `dev`.
 - Never do feature work directly on `main`.

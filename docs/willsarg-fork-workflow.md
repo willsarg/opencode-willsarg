@@ -53,7 +53,7 @@ git push origin --delete feat/<short-name>
 
 ## Sync Upstream
 
-The upstream remote points to `https://github.com/sst/opencode` (which redirects from the old URL). Their default branch is `dev`.
+The upstream remote points to `https://github.com/anomalyco/opencode`. Their default branch is `dev`.
 
 **1. Fetch and fast-forward `main`**
 
@@ -126,4 +126,3 @@ If part of a change could reasonably go upstream:
 ```text
 Work in this repository and follow AGENTS.md, docs/dev-bootstrap.md, and docs/willsarg-fork-workflow.md before making changes. Keep branches and commits tightly scoped, merge finished work into dev, and delete merged feature branches.
 ```
-
